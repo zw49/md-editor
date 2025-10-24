@@ -14,6 +14,8 @@ import { useForm } from "react-hook-form";
 import { Text } from "./ui/text";
 import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { signup } from "@/app/signup/actions";
+import { Toaster } from "./ui/sonner";
 
 type FormValues = {
   email: string;
@@ -29,7 +31,10 @@ export default function SignUpCard() {
     formState: { errors },
   } = useForm<FormValues>();
 
-  const onSubmit = handleSubmit((data) => alert(JSON.stringify(data)));
+  const onSubmit = handleSubmit((data) => {
+    <Toaster />
+  }
+  );
 
   return (
     <Card className="w-full max-w-sm">
