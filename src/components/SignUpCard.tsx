@@ -12,10 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { Text } from "./ui/text";
-import { Info } from "lucide-react";
+import { Info, Loader, Loader2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signup } from "@/app/signup/actions";
-import { Toaster } from "./ui/sonner";
+import { toast } from "sonner";
+import { redirect } from "next/navigation";
+import { useState } from "react";
 
 type FormValues = {
   email: string;
@@ -31,10 +33,11 @@ export default function SignUpCard() {
     formState: { errors },
   } = useForm<FormValues>();
 
-  const onSubmit = handleSubmit((data) => {
-    <Toaster />
-  }
-  );
+  const [isLoading, setIsLoading] = useState(false);
+  const onSubmit = handleSubmit(async (data) => {
+    setIsLoading(true);
+    await signup(data.email, data.password);
+  });
 
   return (
     <Card className="w-full max-w-sm">
@@ -74,7 +77,10 @@ export default function SignUpCard() {
                 id="password"
                 type="password"
                 className={cn(errors.password ? "border-destructive" : "")}
-                {...register("password", { required: "Password is required" })}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 6, message: "Minimum length is 6" },
+                })}
               />
               {errors.password && (
                 <div className="flex items-center gap-2">
@@ -112,7 +118,8 @@ export default function SignUpCard() {
             </div>
 
             <Button type="submit" className="w-full">
-              Sign Up
+              Sign Up{" "}
+              {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
             </Button>
           </div>
         </form>
