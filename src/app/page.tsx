@@ -46,7 +46,7 @@ export default function Home() {
           onSelectDocument={setSelectedDocId}
         />
       </div>
-      <div className="flex-1 m-5">
+      <div className="flex-1 min-h-screen">
         <DocumentEditor />
       </div>
       <div className="fixed top-5 right-5">

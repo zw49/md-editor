@@ -19,9 +19,11 @@ export async function signup(email: string, password: string) {
 
   if (error) {
     console.log(error);
-    redirect("/error");
+    // redirect("/error");
+    return false
   }
 
-  revalidatePath("/", "layout");
-  redirect("/validate-email");
+  // revalidatePath("/", "layout");
+  // redirect("/validate-email");
+  return true
 }

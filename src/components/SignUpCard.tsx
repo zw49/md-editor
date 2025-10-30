@@ -36,7 +36,15 @@ export default function SignUpCard() {
   const [isLoading, setIsLoading] = useState(false);
   const onSubmit = handleSubmit(async (data) => {
     setIsLoading(true);
-    await signup(data.email, data.password);
+    console.log(data)
+    const successful = await signup(data.email, data.password);
+    if (successful) {
+      redirect("/")
+    }
+    else {
+      setIsLoading(false);
+      toast.error("Sign up failed")
+    }
   });
 
   return (

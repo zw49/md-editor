@@ -1,4 +1,5 @@
 "use client";
+import { login } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,9 +12,46 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Info, Loader2Icon } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Text } from "./ui/text";
+import { cn } from "@/lib/utils";
+
 
 export default function LoginCard() {
+  type FormValues = {
+    email: string;
+    confirmPassword: string;
+    password: string;
+  };
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormValues>();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSubmit = handleSubmit(async (data) => {
+    setIsLoading(true);
+    console.log(data)
+
+    const successful = await login(data.email, data.password);
+    if (successful) {
+      redirect("/");
+    }
+    else {
+      setIsLoading(false);
+      toast.error("Unable to sign in")
+    }
+  });
+
   return (
     <>
       <Card className="w-full max-w-sm">
@@ -28,8 +66,8 @@ export default function LoginCard() {
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent>
-          <form>
+        <form className="grid gap-6" onSubmit={onSubmit}>
+          <CardContent>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -37,8 +75,17 @@ export default function LoginCard() {
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  required
+                  className={cn(errors.email ? "border-destructive" : "")}
+                  {...register("email", { required: "Email is required" })}
                 />
+                {errors.email && (
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4 text-destructive" />
+                    <Text className="text-destructive" variant="small">
+                      {errors.email.message}
+                    </Text>
+                  </div>
+                )}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
@@ -50,20 +97,37 @@ export default function LoginCard() {
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  className={cn(errors.password ? "border-destructive" : "")}
+                  {...register("password", {
+                    required: "Password is required",
+                  })}
+                />
+                {errors.password && (
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4 text-destructive" />
+                    <Text className="text-destructive" variant="small">
+                      {errors.password.message}
+                    </Text>
+                  </div>
+                )}
               </div>
             </div>
-          </form>
-        </CardContent>
-        <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
-          <Button variant="outline" className="w-full">
-            Login with Google
-          </Button>
-        </CardFooter>
-      </Card>
+          </CardContent>
+          <CardFooter className="flex-col gap-2">
+            <Button type="submit" className="w-full">
+              Login{" "}
+              {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
+            </Button>
+            <Button disabled variant="outline" className="w-full">
+              Login with Google
+            </Button>
+          </CardFooter>
+        </form>
+
+      </Card >
     </>
   );
 }
