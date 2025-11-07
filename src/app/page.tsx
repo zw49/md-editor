@@ -7,14 +7,14 @@ import { useState } from "react";
 
 export default function Home() {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-  const [content, setContent] = useState<{ title: string; content: string }>({
+  const [document, setDocument] = useState<{ title: string; content: string }>({
     title: "",
     content: "",
   });
 
   const handleSelectDocument = (id: string, content: string, title: string) => {
     setSelectedDocId(id);
-    setContent({ title: title, content: content });
+    setDocument({ title: title, content: content });
   };
 
   return (
@@ -28,8 +28,8 @@ export default function Home() {
       <div className="flex-1 min-h-screen">
         <DocumentEditor
           id={selectedDocId}
-          content={content}
-          onChange={setContent}
+          document={document}
+          onChange={setDocument}
         />
       </div>
       <div className="fixed top-5 right-5">

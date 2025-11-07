@@ -1,5 +1,5 @@
 "use client";
-import { FormEventHandler, useState } from "react";
+import { FormEventHandler, useEffect, useMemo, useState } from "react";
 import Markdown from "react-markdown";
 import {
   ResizableHandle,
@@ -29,29 +29,41 @@ import {
 } from "./ui/input-group";
 import { Code, CopyIcon, FileText, RefreshCwIcon } from "lucide-react";
 import remarkGfm from "remark-gfm";
+import { cn } from "@/lib/utils";
+import { updateDocumentContent } from "@/app/action";
+import _ from 'lodash';
 
 interface DocumentEditorProps {
   id: string | null;
-  content: { title: string; content: string };
+  document: { title: string; content: string };
   onChange: ({ content, title }: { content: string; title: string }) => void;
 }
 
 export default function DocumentEditor({
   id,
-  content,
+  document,
   onChange,
 }: DocumentEditorProps) {
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const debounceUpdateContent = useMemo(() =>
+    _.debounce((content: string) => {
+      // console.log("update")
+      // setIsLoading(true)
+      // updateDocumentContent(id, content);
+      // setIsLoading(false)
+      console.log("updating document", content)
+      // console.log(success)
+    }, 1000), [id])
+
+
   const handleChange = (e: any) => {
-    console.log(e.target.value);
-    onChange({ content: e.target.value, title: content.title });
+    onChange({ content: e.target.value, title: document.title });
+    // send debounced update here
+    debounceUpdateContent(e.target.value)
   };
 
-  // const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-  //   if (e.key === 'Enter') {
-  //     e.preventDefault();
-  //     document.execCommand('insertHTML', false, '<br>');
-  //   }
-  // };
 
   return (
     <div className="flex">
@@ -63,18 +75,18 @@ export default function DocumentEditor({
               placeholder={`# Heading\n**bold**\n*italics*`}
               className="min-h-max resize-none border-none rounded-none"
               onChange={handleChange}
-              value={content.content}
+              value={document.content}
             />
             <InputGroupAddon align="block-end" className="border-t">
-              <InputGroupText>{content.content.length} Words</InputGroupText>
+              <InputGroupText>{document.content.length} Words</InputGroupText>
             </InputGroupAddon>
             <InputGroupAddon align="block-start" className="border-b">
               <InputGroupText className="font-mono font-medium">
                 <FileText className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
-                {content.title || "untitled.md"}
+                {document.title || "untitled.md"}
               </InputGroupText>
               <InputGroupButton className="ml-auto" size="icon-xs">
-                <RefreshCwIcon />
+                <RefreshCwIcon className={cn(`${isLoading ? 'animate-spin' : ''}`)} />
               </InputGroupButton>
               <InputGroupButton variant="ghost" size="icon-xs">
                 <CopyIcon />
@@ -132,7 +144,7 @@ export default function DocumentEditor({
                 ),
               }}
             >
-              {content.content}
+              {document.content}
             </Markdown>
           </div>
         </ResizablePanel>

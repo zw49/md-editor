@@ -47,10 +47,6 @@ export default function DocumentCreateDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger>
-        <Button className="w-full" onClick={() => setIsOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Document
-        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
