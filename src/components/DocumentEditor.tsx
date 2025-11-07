@@ -1,19 +1,49 @@
 "use client";
 import { FormEventHandler, useState } from "react";
 import Markdown from "react-markdown";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "./ui/resizable";
 import { Textarea } from "./ui/textarea";
-import { TypographyH1, TypographyH2, TypographyH3, TypographyH4, TypographyInlineCode, TypographyP } from "./ui/typography";
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupTextarea } from "./ui/input-group";
+import {
+  TypographyBlockquote,
+  TypographyH1,
+  TypographyH2,
+  TypographyH3,
+  TypographyH4,
+  TypographyInlineCode,
+  TypographyP,
+  TypographyTD,
+  TypographyTH,
+  TypographyTR,
+  TypographyUL,
+} from "./ui/typography";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupText,
+  InputGroupTextarea,
+} from "./ui/input-group";
 import { Code, CopyIcon, FileText, RefreshCwIcon } from "lucide-react";
+import remarkGfm from "remark-gfm";
 
-export default function DocumentEditor() {
-  const [text, setText] = useState(
-    "# Heading\n## Subheading\nThis is a paragraph with **bold text**."
-  );
+interface DocumentEditorProps {
+  id: string | null;
+  content: { title: string; content: string };
+  onChange: ({ content, title }: { content: string; title: string }) => void;
+}
+
+export default function DocumentEditor({
+  id,
+  content,
+  onChange,
+}: DocumentEditorProps) {
   const handleChange = (e: any) => {
-    console.log(e.target.value)
-    setText(e.target.value);
+    console.log(e.target.value);
+    onChange({ content: e.target.value, title: content.title });
   };
 
   // const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -33,14 +63,15 @@ export default function DocumentEditor() {
               placeholder={`# Heading\n**bold**\n*italics*`}
               className="min-h-max resize-none border-none rounded-none"
               onChange={handleChange}
+              value={content.content}
             />
             <InputGroupAddon align="block-end" className="border-t">
-              <InputGroupText>Line 1, Column 1</InputGroupText>
+              <InputGroupText>{content.content.length} Words</InputGroupText>
             </InputGroupAddon>
             <InputGroupAddon align="block-start" className="border-b">
               <InputGroupText className="font-mono font-medium">
                 <FileText className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
-                Welcome Document
+                {content.title || "untitled.md"}
               </InputGroupText>
               <InputGroupButton className="ml-auto" size="icon-xs">
                 <RefreshCwIcon />
@@ -63,19 +94,49 @@ export default function DocumentEditor() {
         <ResizableHandle />
         <ResizablePanel>
           <div className="h-full w-full p-5">
-            <Markdown components={{
-              h1: ({ node, children, ...props }) => <TypographyH1>{children}</TypographyH1>,
-              h2: ({ node, children, ...props }) => <TypographyH2>{children}</TypographyH2>,
-              h3: ({ node, children, ...props }) => <TypographyH3>{children}</TypographyH3>,
-              h4: ({ node, children, ...props }) => <TypographyH4>{children}</TypographyH4>,
-              p: ({ node, children, ...props }) => <TypographyP>{children}</TypographyP>,
-              code: ({ node, children, ...props }) => <TypographyInlineCode>{children}</TypographyInlineCode>,
-
-            }}>{text.replace("<div><br></div>", "\n")}</Markdown>
+            <Markdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ node, children, ...props }) => (
+                  <TypographyH1>{children}</TypographyH1>
+                ),
+                h2: ({ node, children, ...props }) => (
+                  <TypographyH2>{children}</TypographyH2>
+                ),
+                h3: ({ node, children, ...props }) => (
+                  <TypographyH3>{children}</TypographyH3>
+                ),
+                h4: ({ node, children, ...props }) => (
+                  <TypographyH4>{children}</TypographyH4>
+                ),
+                p: ({ node, children, ...props }) => (
+                  <TypographyP>{children}</TypographyP>
+                ),
+                code: ({ node, children, ...props }) => (
+                  <TypographyInlineCode>{children}</TypographyInlineCode>
+                ),
+                th: ({ node, children, ...props }) => (
+                  <TypographyTH>{children}</TypographyTH>
+                ),
+                tr: ({ node, children, ...props }) => (
+                  <TypographyTR>{children}</TypographyTR>
+                ),
+                td: ({ node, children, ...props }) => (
+                  <TypographyTD>{children}</TypographyTD>
+                ),
+                blockquote: ({ node, children, ...props }) => (
+                  <TypographyBlockquote>{children}</TypographyBlockquote>
+                ),
+                ul: ({ node, children, ...props }) => (
+                  <TypographyUL>{children}</TypographyUL>
+                ),
+              }}
+            >
+              {content.content}
+            </Markdown>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
-
     </div>
   );
 }

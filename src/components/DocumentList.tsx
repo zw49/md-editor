@@ -1,38 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Plus, FileText } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Card } from "./ui/card";
 import DocumentCreateDialog from "./DocumentCreateDialog";
+import { createClient } from "@supabase/supabase-js";
 
 interface Document {
   id: string;
   title: string;
   content: string;
-  lastModified: Date;
+  updated_at: string;
 }
 
 interface DocumentListProps {
-  documents: Document[];
   selectedDocId: string | null;
-  onSelectDocument: (id: string) => void;
+  onSelectDocument: (id: string, content: string, title: string) => void;
 }
 
 export function DocumentList({
-  documents,
   selectedDocId,
   onSelectDocument,
 }: DocumentListProps) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+  const supabaseKey = process.env
+    .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string;
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  const [documents, setDocuments] = useState<Document[]>([]);
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("id,title,content,updated_at");
+
+      if (error) console.error(error);
+      else {
+        console.log(data);
+        setDocuments(data as Document[]);
+      }
+    };
+
+    fetchDocuments();
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredDocuments = documents.filter((doc) =>
     doc.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const formatDate = (date: Date) => {
+  const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "numeric",
@@ -70,14 +93,14 @@ export function DocumentList({
                 className={`p-3 cursor-pointer transition-colors hover:bg-accent ${
                   selectedDocId === doc.id ? "bg-accent border-primary" : ""
                 }`}
-                onClick={() => onSelectDocument(doc.id)}
+                onClick={() => onSelectDocument(doc.id, doc.content, doc.title)}
               >
                 <div className="flex items-start gap-3">
                   <FileText className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="truncate">{doc.title}</div>
                     <div className="text-muted-foreground text-sm">
-                      {formatDate(doc.lastModified)}
+                      {formatDate(doc.updated_at)}
                     </div>
                   </div>
                 </div>
