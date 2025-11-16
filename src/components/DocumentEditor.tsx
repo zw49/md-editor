@@ -1,12 +1,11 @@
 "use client";
-import { FormEventHandler, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Markdown from "react-markdown";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "./ui/resizable";
-import { Textarea } from "./ui/textarea";
 import {
   TypographyBlockquote,
   TypographyH1,
@@ -27,7 +26,7 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "./ui/input-group";
-import { Code, CopyIcon, FileText, RefreshCwIcon } from "lucide-react";
+import { CopyIcon, FileText, RefreshCwIcon } from "lucide-react";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 import { updateDocumentContent } from "@/app/action";
@@ -58,9 +57,7 @@ export default function DocumentEditor({
     [id]
   );
 
-  // this is a test of this
-
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange({ content: e.target.value, title: document.title });
     // send debounced update here
     debounceUpdateContent(e.target.value);
