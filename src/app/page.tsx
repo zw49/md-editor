@@ -13,17 +13,17 @@ export default function Home() {
     title: "",
     content: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const handleSelectDocument = async (id: string) => {
     setSelectedDocId(id);
-    setIsLoading(true);
-    const { data, error } = await supabase
+    // setIsLoading(true);
+    const { data } = await supabase
       .from("documents")
       .select("title,content")
       .eq("id", id)
       .single();
-    setIsLoading(false);
+    // setIsLoading(false);
     setDocument({ title: data?.title, content: data?.content });
     // fetch the content of the selected document
   };
