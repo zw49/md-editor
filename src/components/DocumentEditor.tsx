@@ -58,6 +58,8 @@ export default function DocumentEditor({
     [id]
   );
 
+  // this is a test of this
+
   const handleChange = (e: any) => {
     onChange({ content: e.target.value, title: document.title });
     // send debounced update here
