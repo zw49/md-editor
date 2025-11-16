@@ -3,18 +3,29 @@
 import DocumentEditor from "@/components/DocumentEditor";
 import { DocumentList } from "@/components/DocumentList";
 import Menu from "@/components/Menu";
+import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
 
 export default function Home() {
+  const supabase = createClient();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-  const [content, setContent] = useState<{ title: string; content: string }>({
+  const [document, setDocument] = useState<{ title: string; content: string }>({
     title: "",
     content: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSelectDocument = (id: string, content: string, title: string) => {
+  const handleSelectDocument = async (id: string) => {
     setSelectedDocId(id);
-    setContent({ title: title, content: content });
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from("documents")
+      .select("title,content")
+      .eq("id", id)
+      .single();
+    setIsLoading(false);
+    setDocument({ title: data?.title, content: data?.content });
+    // fetch the content of the selected document
   };
 
   return (
@@ -28,8 +39,8 @@ export default function Home() {
       <div className="flex-1 min-h-screen">
         <DocumentEditor
           id={selectedDocId}
-          content={content}
-          onChange={setContent}
+          document={document}
+          onChange={setDocument}
         />
       </div>
       <div className="fixed top-5 right-5">

@@ -13,7 +13,7 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "@radix-ui/react-label";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -22,16 +22,18 @@ export default function DocumentCreateDialog() {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-  const supabaseKey = process.env
-    .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabase = createClient();
 
   const handleDocumentCreate = async () => {
     setIsLoading(true);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     const { data, error } = await supabase
       .from("documents")
-      .insert([{ title: documentName, content: "" }])
+      .insert([
+        { user_id: session?.user?.id, title: documentName, content: "" },
+      ])
       .select();
     if (error) {
       console.error(error);
@@ -46,10 +48,12 @@ export default function DocumentCreateDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger>
-        <Button className="w-full" onClick={() => setIsOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Document
+      <DialogTrigger className="w-full">
+        <Button className="w-full" asChild>
+          <div>
+            <Plus className="mr-2 h-4 w-4" />
+            New Document
+          </div>
         </Button>
       </DialogTrigger>
       <DialogContent>

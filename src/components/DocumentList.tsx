@@ -7,7 +7,7 @@ import { Input } from "./ui/input";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Card } from "./ui/card";
 import DocumentCreateDialog from "./DocumentCreateDialog";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/client";
 
 interface Document {
   id: string;
@@ -18,17 +18,14 @@ interface Document {
 
 interface DocumentListProps {
   selectedDocId: string | null;
-  onSelectDocument: (id: string, content: string, title: string) => void;
+  onSelectDocument: (id: string) => void;
 }
 
 export function DocumentList({
   selectedDocId,
   onSelectDocument,
 }: DocumentListProps) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-  const supabaseKey = process.env
-    .NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabase = createClient();
 
   const [documents, setDocuments] = useState<Document[]>([]);
 
@@ -36,7 +33,7 @@ export function DocumentList({
     const fetchDocuments = async () => {
       const { data, error } = await supabase
         .from("documents")
-        .select("id,title,content,updated_at");
+        .select("id,title,updated_at");
 
       if (error) console.error(error);
       else {
@@ -90,10 +87,9 @@ export function DocumentList({
             filteredDocuments.map((doc) => (
               <Card
                 key={doc.id}
-                className={`p-3 cursor-pointer transition-colors hover:bg-accent ${
-                  selectedDocId === doc.id ? "bg-accent border-primary" : ""
-                }`}
-                onClick={() => onSelectDocument(doc.id, doc.content, doc.title)}
+                className={`p-3 cursor-pointer transition-colors hover:bg-accent ${selectedDocId === doc.id ? "bg-accent border-primary" : ""
+                  }`}
+                onClick={() => onSelectDocument(doc.id)}
               >
                 <div className="flex items-start gap-3">
                   <FileText className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
