@@ -31,8 +31,8 @@ import { Code, CopyIcon, FileText, RefreshCwIcon } from "lucide-react";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 import { updateDocumentContent } from "@/app/action";
-import _ from 'lodash';
-
+import _ from "lodash";
+import { ScrollArea } from "./ui/scroll-area";
 interface DocumentEditorProps {
   id: string | null;
   document: { title: string; content: string };
@@ -44,26 +44,25 @@ export default function DocumentEditor({
   document,
   onChange,
 }: DocumentEditorProps) {
-
   const [isLoading, setIsLoading] = useState(false);
 
-  const debounceUpdateContent = useMemo(() =>
-    _.debounce((content: string) => {
-      // console.log("update")
-      // setIsLoading(true)
-      // updateDocumentContent(id, content);
-      // setIsLoading(false)
-      console.log("updating document", content)
-      // console.log(success)
-    }, 1000), [id])
-
+  const debounceUpdateContent = useMemo(
+    () =>
+      _.debounce((content: string) => {
+        if (!id) return;
+        // console.log("update")
+        setIsLoading(true);
+        updateDocumentContent(id, content);
+        setIsLoading(false); // console.log(success)
+      }, 1000),
+    [id]
+  );
 
   const handleChange = (e: any) => {
     onChange({ content: e.target.value, title: document.title });
     // send debounced update here
-    debounceUpdateContent(e.target.value)
+    debounceUpdateContent(e.target.value);
   };
-
 
   return (
     <div className="flex">
@@ -86,7 +85,9 @@ export default function DocumentEditor({
                 {document.title || "untitled.md"}
               </InputGroupText>
               <InputGroupButton className="ml-auto" size="icon-xs">
-                <RefreshCwIcon className={cn(`${isLoading ? 'animate-spin' : ''}`)} />
+                <RefreshCwIcon
+                  className={cn(`${isLoading ? "animate-spin" : ""}`)}
+                />
               </InputGroupButton>
               <InputGroupButton variant="ghost" size="icon-xs">
                 <CopyIcon />
@@ -105,48 +106,50 @@ export default function DocumentEditor({
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel>
-          <div className="h-full w-full p-5">
-            <Markdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                h1: ({ node, children, ...props }) => (
-                  <TypographyH1>{children}</TypographyH1>
-                ),
-                h2: ({ node, children, ...props }) => (
-                  <TypographyH2>{children}</TypographyH2>
-                ),
-                h3: ({ node, children, ...props }) => (
-                  <TypographyH3>{children}</TypographyH3>
-                ),
-                h4: ({ node, children, ...props }) => (
-                  <TypographyH4>{children}</TypographyH4>
-                ),
-                p: ({ node, children, ...props }) => (
-                  <TypographyP>{children}</TypographyP>
-                ),
-                code: ({ node, children, ...props }) => (
-                  <TypographyInlineCode>{children}</TypographyInlineCode>
-                ),
-                th: ({ node, children, ...props }) => (
-                  <TypographyTH>{children}</TypographyTH>
-                ),
-                tr: ({ node, children, ...props }) => (
-                  <TypographyTR>{children}</TypographyTR>
-                ),
-                td: ({ node, children, ...props }) => (
-                  <TypographyTD>{children}</TypographyTD>
-                ),
-                blockquote: ({ node, children, ...props }) => (
-                  <TypographyBlockquote>{children}</TypographyBlockquote>
-                ),
-                ul: ({ node, children, ...props }) => (
-                  <TypographyUL>{children}</TypographyUL>
-                ),
-              }}
-            >
-              {document.content}
-            </Markdown>
-          </div>
+          <ScrollArea>
+            <div className="w-full p-5 max-h-screen">
+              <Markdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  h1: ({ node, children, ...props }) => (
+                    <TypographyH1>{children}</TypographyH1>
+                  ),
+                  h2: ({ node, children, ...props }) => (
+                    <TypographyH2>{children}</TypographyH2>
+                  ),
+                  h3: ({ node, children, ...props }) => (
+                    <TypographyH3>{children}</TypographyH3>
+                  ),
+                  h4: ({ node, children, ...props }) => (
+                    <TypographyH4>{children}</TypographyH4>
+                  ),
+                  p: ({ node, children, ...props }) => (
+                    <TypographyP>{children}</TypographyP>
+                  ),
+                  code: ({ node, children, ...props }) => (
+                    <TypographyInlineCode>{children}</TypographyInlineCode>
+                  ),
+                  th: ({ node, children, ...props }) => (
+                    <TypographyTH>{children}</TypographyTH>
+                  ),
+                  tr: ({ node, children, ...props }) => (
+                    <TypographyTR>{children}</TypographyTR>
+                  ),
+                  td: ({ node, children, ...props }) => (
+                    <TypographyTD>{children}</TypographyTD>
+                  ),
+                  blockquote: ({ node, children, ...props }) => (
+                    <TypographyBlockquote>{children}</TypographyBlockquote>
+                  ),
+                  ul: ({ node, children, ...props }) => (
+                    <TypographyUL>{children}</TypographyUL>
+                  ),
+                }}
+              >
+                {document.content}
+              </Markdown>
+            </div>
+          </ScrollArea>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
