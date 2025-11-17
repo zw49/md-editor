@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Plus, FileText } from "lucide-react";
+import { Search, Plus, FileText, Trash } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Card } from "./ui/card";
 import DocumentCreateDialog from "./DocumentCreateDialog";
 import { createClient } from "@/utils/supabase/client";
+import { useFetchDocuments } from "@/app/document/actions";
 
 interface Document {
   id: string;
@@ -25,29 +26,26 @@ export function DocumentList({
   selectedDocId,
   onSelectDocument,
 }: DocumentListProps) {
-  const supabase = createClient();
-
   const [documents, setDocuments] = useState<Document[]>([]);
 
+  const { data, error, isLoading } = useFetchDocuments()
+
   useEffect(() => {
-    const fetchDocuments = async () => {
-      const { data, error } = await supabase
-        .from("documents")
-        .select("id,title,updated_at");
+    setDocuments(data as Document[]);
+  }, [data])
 
-      if (error) console.error(error);
-      else {
-        console.log(data);
-        setDocuments(data as Document[]);
-      }
-    };
 
-    fetchDocuments();
-  }, []);
+  const fetchDocuments = async () => {
+
+  };
+
+  // useEffect(() => {
+  //   fetchDocuments();
+  // }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredDocuments = documents.filter((doc) =>
+  const filteredDocuments = documents?.filter((doc) =>
     doc.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -79,12 +77,12 @@ export function DocumentList({
 
       <ScrollArea className="flex-1">
         <div className="px-4 pb-4 space-y-2">
-          {filteredDocuments.length === 0 ? (
+          {filteredDocuments?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               {searchQuery ? "No documents found" : "No documents yet"}
             </div>
           ) : (
-            filteredDocuments.map((doc) => (
+            filteredDocuments?.map((doc) => (
               <Card
                 key={doc.id}
                 className={`p-3 cursor-pointer transition-colors hover:bg-accent ${selectedDocId === doc.id ? "bg-accent border-primary" : ""

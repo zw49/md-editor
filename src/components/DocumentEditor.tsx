@@ -33,6 +33,9 @@ import { cn } from "@/lib/utils";
 import { updateDocumentContent } from "@/app/action";
 import _ from "lodash";
 import { ScrollArea } from "./ui/scroll-area";
+import { copyToClipboard } from "@/utils/misc";
+import { toast } from "sonner";
+
 interface DocumentEditorProps {
   id: string | null;
   document: { title: string; content: string };
@@ -60,10 +63,11 @@ export default function DocumentEditor({
 
   // this is a test of this
 
-  const handleChange = (e: any) => {
-    onChange({ content: e.target.value, title: document.title });
+  const handleChange = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    onChange({ content: target.value, title: document.title });
     // send debounced update here
-    debounceUpdateContent(e.target.value);
+    debounceUpdateContent(target.value);
   };
 
   return (
@@ -91,7 +95,10 @@ export default function DocumentEditor({
                   className={cn(`${isLoading ? "animate-spin" : ""}`)}
                 />
               </InputGroupButton>
-              <InputGroupButton variant="ghost" size="icon-xs">
+              <InputGroupButton variant="ghost" size="icon-xs" onClick={() => {
+                copyToClipboard(document.content)
+                toast.success("Copied text to clipboard")
+              }}>
                 <CopyIcon />
               </InputGroupButton>
             </InputGroupAddon>

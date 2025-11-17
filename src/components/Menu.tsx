@@ -1,4 +1,4 @@
-import { MenuIcon } from "lucide-react";
+import { MenuIcon, Trash } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -14,8 +14,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { redirect } from "next/navigation";
+import { SetStateAction, useContext } from "react";
+import { SelectedDocumentContext } from "@/app/page";
+import { useDeleteDocument } from "@/app/document/actions";
 
-export default function Menu() {
+export default function Menu({ setSelectedDocumentId }: { setSelectedDocumentId: React.Dispatch<SetStateAction<string | null>> }) {
+  const selectedDocumentId = useContext(SelectedDocumentContext);
+  const deleteDocumentMutation = useDeleteDocument();
+
+  const handleDeleteDocument = () => {
+    const id = selectedDocumentId;
+    if (id)
+      deleteDocumentMutation.mutate({
+        id,
+      })
+    setSelectedDocumentId(null)
+  }
+
   const handleSignout = () => {
     redirect("/logout")
   }
@@ -66,12 +81,17 @@ export default function Menu() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>GitHub</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => window.open("https://github.com/zw49/md-editor")}>GitHub</DropdownMenuItem>
         <DropdownMenuItem>Support</DropdownMenuItem>
         <DropdownMenuItem disabled>API</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignout}>
           Log out
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-red-500" onClick={handleDeleteDocument}>
+          <Trash className="text-red-500" />
+          Delete Document
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

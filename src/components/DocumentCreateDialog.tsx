@@ -16,34 +16,17 @@ import { Label } from "@radix-ui/react-label";
 import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCreateDocument } from "@/app/document/actions";
 
 export default function DocumentCreateDialog() {
   const [documentName, setDocumentName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const supabase = createClient();
+  const documentCreateMutation = useCreateDocument()
 
-  const handleDocumentCreate = async () => {
-    setIsLoading(true);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const { data, error } = await supabase
-      .from("documents")
-      .insert([
-        { user_id: session?.user?.id, title: documentName, content: "" },
-      ])
-      .select();
-    if (error) {
-      console.error(error);
-      toast.error("Error creating document");
-    } else {
-      console.log(data);
-      toast.success("Document created successfully");
-      setIsOpen(false);
-    }
-    setIsLoading(false);
+  const handleDocumentCreate = () => {
+    documentCreateMutation.mutate(documentName);
+    setIsOpen(false)
   };
 
   return (
@@ -82,7 +65,7 @@ export default function DocumentCreateDialog() {
           </DialogClose>
           <Button onClick={handleDocumentCreate} type="submit">
             Save changes{" "}
-            {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
+            {documentCreateMutation.isPending && <Loader2Icon className="h-4 w-4 animate-spin" />}
           </Button>
         </DialogFooter>
       </DialogContent>
